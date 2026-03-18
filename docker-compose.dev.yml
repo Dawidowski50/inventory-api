@@ -1,0 +1,6 @@
+services:
+  mongo:
+    # Dev-only: expose MongoDB on host for local tooling.
+    ports:
+      - "27017:27017"
+

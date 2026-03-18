@@ -17,8 +17,8 @@ pipeline {
 
     stage('Build & Run (Docker)') {
       steps {
-        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml build --no-cache'
-        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d'
+        sh 'docker compose -f docker-compose.yml build --no-cache'
+        sh 'docker compose -f docker-compose.yml up -d'
         sh '''
           set -e
           echo "Waiting for API to start..."
@@ -38,7 +38,7 @@ pipeline {
 
     stage('Load CSV into MongoDB') {
       steps {
-        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T api python3 scripts/import_csv.py --csv data/products.csv --mongo-uri mongodb://mongo:27017 --db inventory --collection products'
+        sh 'docker compose -f docker-compose.yml exec -T api python3 scripts/import_csv.py --csv data/products.csv --mongo-uri mongodb://mongo:27017 --db inventory --collection products'
       }
     }
 
@@ -56,7 +56,7 @@ pipeline {
 
     stage('Generate README.txt') {
       steps {
-        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T api python3 scripts/generate_readme.py > README.txt'
+        sh 'docker compose -f docker-compose.yml exec -T api python3 scripts/generate_readme.py > README.txt'
       }
     }
 
@@ -81,7 +81,9 @@ pipeline {
             "monitoring",
             "Dockerfile",
             "docker-compose.yml",
+            "docker-compose.dev.yml",
             "docker-compose.monitoring.yml",
+            "docker-compose.ci.yml",
             "requirements.txt",
             ".env.example",
             "Jenkinsfile",
@@ -109,7 +111,7 @@ pipeline {
 
   post {
     always {
-      sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v || true'
+      sh 'docker compose -f docker-compose.yml down -v || true'
     }
   }
 }
