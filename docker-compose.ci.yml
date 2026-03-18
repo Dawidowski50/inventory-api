@@ -1,7 +1,10 @@
 services:
   mongo:
-    # Compose merge behavior for `ports` can vary; publishing on a different
-    # host port guarantees no conflict with local/dev Mongo on 27017.
+    # CI/Jenkins: don't publish Mongo to host (avoid conflicts).
+    ports: []
+
+  api:
+    # CI/Jenkins: publish API on alternate host port (avoid conflicts with dev on 8000).
     ports:
-      - "27018:27017"
+      - "8001:8000"
 
