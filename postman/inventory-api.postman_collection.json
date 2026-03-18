@@ -1,0 +1,301 @@
+{
+  "info": {
+    "name": "Inventory API",
+    "_postman_id": "2f3c0d6e-2dfc-4b0c-9e9e-1e5b8b6d2b7a",
+    "description": "Postman collection for Inventory API assignment endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET getAll",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/getAll"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('returns array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET getSingleProduct (existing)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/getSingleProduct?ProductID=1001",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "getSingleProduct"
+          ],
+          "query": [
+            {
+              "key": "ProductID",
+              "value": "1001"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('has ProductID=1001', function () { pm.expect(body.ProductID).to.eql(1001); });",
+              "pm.test('has required fields', function () {",
+              "  ['Name','UnitPrice','StockQuantity','Description'].forEach(k => pm.expect(body).to.have.property(k));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST addNew",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ProductID\": {{$randomInt}},\n  \"Name\": \"Postman Test Product\",\n  \"UnitPrice\": 12.34,\n  \"StockQuantity\": 3,\n  \"Description\": \"Created by Newman pipeline test\"\n}"
+        },
+        "url": "{{baseUrl}}/addNew"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+              "const body = pm.response.json();",
+              "pm.test('returns created product fields', function () {",
+              "  ['ProductID','Name','UnitPrice','StockQuantity','Description'].forEach(k => pm.expect(body).to.have.property(k));",
+              "});",
+              "pm.collectionVariables.set('createdProductID', body.ProductID);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET getSingleProduct (created)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/getSingleProduct?ProductID={{createdProductID}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "getSingleProduct"
+          ],
+          "query": [
+            {
+              "key": "ProductID",
+              "value": "{{createdProductID}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('matches created ProductID', function () { pm.expect(body.ProductID).to.eql(parseInt(pm.collectionVariables.get('createdProductID'))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET startsWith (s)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/startsWith?letter=s",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "startsWith"
+          ],
+          "query": [
+            {
+              "key": "letter",
+              "value": "s"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const arr = pm.response.json();",
+              "pm.test('returns array', function () { pm.expect(arr).to.be.an('array'); });",
+              "pm.test('each Name starts with s (case-insensitive)', function () {",
+              "  arr.forEach(p => pm.expect(p.Name.toLowerCase().startsWith('s')).to.be.true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET paginate (1001-1100)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/paginate?startProductID=1001&endProductID=1100",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "paginate"
+          ],
+          "query": [
+            {
+              "key": "startProductID",
+              "value": "1001"
+            },
+            {
+              "key": "endProductID",
+              "value": "1100"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const arr = pm.response.json();",
+              "pm.test('returns <= 10 items', function () { pm.expect(arr.length).to.be.at.most(10); });",
+              "pm.test('items in range', function () {",
+              "  arr.forEach(p => pm.expect(p.ProductID).to.be.within(1001, 1100));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET convert (1001)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/convert?ProductID=1001",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "convert"
+          ],
+          "query": [
+            {
+              "key": "ProductID",
+              "value": "1001"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('has EUR price', function () { pm.expect(body).to.have.property('UnitPriceEUR'); });",
+              "pm.test('rate present', function () { pm.expect(body).to.have.property('RateUSDtoEUR'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE deleteOne (created)",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/deleteOne?ProductID={{createdProductID}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "deleteOne"
+          ],
+          "query": [
+            {
+              "key": "ProductID",
+              "value": "{{createdProductID}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('deleted true', function () { pm.expect(body.deleted).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET metrics",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/metrics"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('looks like prometheus text', function () { pm.expect(pm.response.text()).to.include('# HELP'); });"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "createdProductID",
+      "value": ""
+    }
+  ]
+}
+
