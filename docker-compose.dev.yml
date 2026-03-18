@@ -1,4 +1,9 @@
 services:
+  api:
+    # Dev-only: expose API on host for browser/Postman.
+    ports:
+      - "8000:8000"
+
   mongo:
     # Dev-only: expose MongoDB on host for local tooling.
     ports:

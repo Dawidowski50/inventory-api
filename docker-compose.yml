@@ -10,8 +10,6 @@ services:
       - MONGODB_URI=mongodb://mongo:27017
       - MONGODB_DB=inventory
       - MONGODB_COLLECTION=products
-    ports:
-      - "8000:8000"
     depends_on:
       - mongo
 
