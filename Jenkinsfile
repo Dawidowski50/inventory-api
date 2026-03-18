@@ -63,45 +63,45 @@ pipeline {
     stage('Package zip artifact') {
       steps {
         sh '''
-          python3 - <<'PY'
-          from __future__ import annotations
-          import os
-          from datetime import datetime
-          from pathlib import Path
-          import zipfile
+python3 - <<'PY'
+from __future__ import annotations
 
-          ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-          out = Path(f"complete-{ts}.zip")
-          include = [
-            "app",
-            "scripts",
-            "data",
-            "postman",
-            "tests",
-            "monitoring",
-            "Dockerfile",
-            "docker-compose.yml",
-            "docker-compose.dev.yml",
-            "docker-compose.monitoring.yml",
-            "docker-compose.ci.yml",
-            "requirements.txt",
-            ".env.example",
-            "Jenkinsfile",
-            "README.txt",
-          ]
+from datetime import datetime
+from pathlib import Path
+import zipfile
 
-          with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            for item in include:
-              p = Path(item)
-              if p.is_dir():
-                for fp in p.rglob("*"):
-                  if fp.is_file():
-                    z.write(fp, fp.as_posix())
-              elif p.is_file():
-                z.write(p, p.as_posix())
+ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+out = Path(f"complete-{ts}.zip")
+include = [
+  "app",
+  "scripts",
+  "data",
+  "postman",
+  "tests",
+  "monitoring",
+  "Dockerfile",
+  "docker-compose.yml",
+  "docker-compose.dev.yml",
+  "docker-compose.monitoring.yml",
+  "docker-compose.ci.yml",
+  "requirements.txt",
+  ".env.example",
+  "Jenkinsfile",
+  "README.txt",
+]
 
-          print(out)
-          PY
+with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as z:
+  for item in include:
+    p = Path(item)
+    if p.is_dir():
+      for fp in p.rglob("*"):
+        if fp.is_file():
+          z.write(fp, fp.as_posix())
+    elif p.is_file():
+      z.write(p, p.as_posix())
+
+print(out)
+PY
         '''
         archiveArtifacts artifacts: 'complete-*.zip', fingerprint: true
         archiveArtifacts artifacts: 'README.txt', fingerprint: true
