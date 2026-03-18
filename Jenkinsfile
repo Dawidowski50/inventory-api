@@ -17,8 +17,8 @@ pipeline {
 
     stage('Build & Run (Docker)') {
       steps {
-        sh 'docker compose build --no-cache'
-        sh 'docker compose up -d'
+        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml build --no-cache'
+        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d'
         sh '''
           set -e
           echo "Waiting for API to start..."
@@ -38,7 +38,7 @@ pipeline {
 
     stage('Load CSV into MongoDB') {
       steps {
-        sh 'docker compose exec -T api python3 scripts/import_csv.py --csv data/products.csv --mongo-uri mongodb://mongo:27017 --db inventory --collection products'
+        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T api python3 scripts/import_csv.py --csv data/products.csv --mongo-uri mongodb://mongo:27017 --db inventory --collection products'
       }
     }
 
@@ -56,7 +56,7 @@ pipeline {
 
     stage('Generate README.txt') {
       steps {
-        sh 'docker compose exec -T api python3 scripts/generate_readme.py > README.txt'
+        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T api python3 scripts/generate_readme.py > README.txt'
       }
     }
 
@@ -109,7 +109,7 @@ pipeline {
 
   post {
     always {
-      sh 'docker compose down -v || true'
+      sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v || true'
     }
   }
 }

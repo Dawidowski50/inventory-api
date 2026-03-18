@@ -1,0 +1,6 @@
+services:
+  mongo:
+    # In CI/Jenkins we don't need Mongo exposed on the host.
+    # This avoids "port is already allocated" conflicts on shared agents.
+    ports: []
+
