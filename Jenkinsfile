@@ -3,6 +3,9 @@ pipeline {
 
   environment {
     COMPOSE_PROJECT_NAME = "inventory"
+    // macOS Jenkins (brew/launchd) often has a restricted PATH, so docker isn't found.
+    // Include common Docker Desktop CLI locations (Intel + Apple Silicon).
+    PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
   }
 
   stages {
